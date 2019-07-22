@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+    <title>Is MWR NB?</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<div class="card mt-4 ml-4 mr-4">
+    <div class="card-body">
+        <h5 class="card-title">is MWR NB?</h5>
+        <button id="btn_yes" class="btn btn-success">
+            Yes<span id="span_yes" class="badge badge-light ml-3">0</span>
+        </button>
+        <button id="btn_no" class="btn btn-danger">
+            No<span id="span_no" class="badge badge-light ml-3">0</span>
+        </button>
+    </div>
+</div>
+<script type="text/javascript">
+    'use strict';
+    (function () {
+        let num_yes = 0;
+        let num_no = 0;
+        let spanYes = document.getElementById('span_yes');
+        let spanNo = document.getElementById('span_no');
+        fetch('https://api.keyvalue.xyz/7aae2bba/mwrnb').then(res => res.text()).then(res => {
+            num_yes = Number.parseInt(res) || 0;
+            spanYes.innerText = num_yes;
+        });
+        fetch('https://api.keyvalue.xyz/35880581/mwrbnb').then(res => res.text()).then(res => {
+            num_no = Number.parseInt(res) || 0;
+            spanNo.innerText = num_no;
+        });
+        document.getElementById('btn_yes').addEventListener('click', _ => {
+            fetch('https://api.keyvalue.xyz/7aae2bba/mwrnb').then(res => res.text()).then(res => {
+                num_yes = Number.parseInt(res) || 0;
+                num_yes++;
+                fetch('https://api.keyvalue.xyz/7aae2bba/mwrnb/' + num_yes, {method: 'POST',}).then(res => {
+                    spanYes.innerText = num_yes;
+                });
+            });
+        });
+        document.getElementById('btn_no').addEventListener('click', _ => {
+            fetch('https://api.keyvalue.xyz/35880581/mwrbnb').then(res => res.text()).then(res => {
+                num_no = Number.parseInt(res) || 0;
+                num_no++;
+                fetch('https://api.keyvalue.xyz/35880581/mwrbnb/' + num_no, {method: 'POST',}).then(res => {
+                    spanNo.innerText = num_no;
+                });
+            });
+        });
+    })();
+</script>
+</body>
+</html>
