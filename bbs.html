@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+    <title>MWR BBS</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<div id="post_list_container" class="card mt-4 ml-4 mr-4">
+    <div class="card-body">
+        <h5 class="card-title">帖子列表</h5>
+        <a href="#create" role="button" class="btn btn-primary">发帖</a>
+        <ul class="list-group list-group-flush" id="post_list">
+        </ul>
+    </div>
+</div>
+<div id="post_detail_container" class="card mt-4 ml-4 mr-4">
+    <div class="card-body">
+        <h5 id="post_title" class="card-title"></h5>
+        <a href="#" role="button" class="btn btn-primary">返回列表</a>
+        <p id="post_content"></p>
+    </div>
+</div>
+<div id="post_create_container" class="card mt-4 ml-4 mr-4">
+    <div class="card-body">
+        <h5 class="card-title">发帖</h5>
+        <div class="form-group">
+            <label for="txt_title">标题</label>
+            <input id="txt_title" class="form-control" type="text"/>
+        </div>
+        <div class="form-group">
+            <label for="txt_content">输出</label>
+            <textarea id="txt_content" class="form-control" rows="6"></textarea>
+        </div>
+        <button id="btn_create" class="btn btn-block btn-success">发布</button>
+    </div>
+</div>
+<script type="text/javascript">
+    'use strict';
+    (function () {
+        console.log(location.hash);
+        let posts = [];
+        let post_list = document.getElementById('post_list');
+        let post_list_container = document.getElementById('post_list_container');
+        let post_detail_container = document.getElementById('post_detail_container');
+        let post_create_container = document.getElementById('post_create_container');
+
+        let post_title = document.getElementById('post_title');
+        let post_content = document.getElementById('post_content');
+
+        let txt_title = document.getElementById('txt_title');
+        let txt_content = document.getElementById('txt_content');
+        document.getElementById('btn_create').addEventListener('click', _ => {
+            let post = {'title': txt_title.value, 'content': txt_content.value, 'timestamp': new Date().getTime()};
+            fetch("https://kvdb.io/XWhijUUk3cEuLTCgHd3eFs/post_" + post.timestamp, {
+                'method': 'POST',
+                'body': JSON.stringify(post)
+            }).then(r => {
+                location.hash = '#' + post.timestamp;
+            });
+        });
+
+        loadContent();
+
+        window.addEventListener('hashchange', function (e) {
+            loadContent();
+        });
+
+        function loadContent() {
+            let hashData = location.hash.substr(1);
+            if (hashData) {
+                if (hashData === 'create') {
+                    post_create_container.style.display = 'block';
+                    post_list_container.style.display = 'none';
+                    post_detail_container.style.display = 'none';
+                } else {
+                    post_create_container.style.display = 'none';
+                    post_list_container.style.display = 'none';
+                    post_detail_container.style.display = 'block';
+                    fetch("https://kvdb.io/XWhijUUk3cEuLTCgHd3eFs/post_" + hashData + "?&format=json")
+                        .then(r => r.json()).then(r => {
+                        post_title.innerText = r.title;
+                        post_content.innerText = r.content;
+                    });
+                }
+            } else {
+                post_create_container.style.display = 'none';
+                post_list_container.style.display = 'block';
+                post_detail_container.style.display = 'none';
+                fetch("https://kvdb.io/XWhijUUk3cEuLTCgHd3eFs/?regex=%5Epost_&format=json&values=true")
+                    .then(r => r.json()).then(r => {
+                    posts = r;
+                    post_list.innerHTML = '';
+                    r.forEach(i => {
+                        let l = document.createElement('li');
+                        let lk = i[0].substr(5);
+                        let p = JSON.parse(i[1]);
+                        l.innerHTML = `<a href="#${lk}">${p.title}</a>`;
+                        l.classList.add('list-group-item');
+                        post_list.appendChild(l);
+                    })
+                });
+            }
+        }
+    })();
+</script>
+</body>
+</html>
