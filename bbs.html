@@ -41,30 +41,25 @@
 <script type="text/javascript">
     'use strict';
     (function () {
-        console.log(location.hash);
+        let conf = {token: 'XWhijUUk3cEuLTCgHd3eFs'};
         let posts = [];
         let post_list = document.getElementById('post_list');
         let post_list_container = document.getElementById('post_list_container');
         let post_detail_container = document.getElementById('post_detail_container');
         let post_create_container = document.getElementById('post_create_container');
-
         let post_title = document.getElementById('post_title');
         let post_content = document.getElementById('post_content');
-
         let txt_title = document.getElementById('txt_title');
         let txt_content = document.getElementById('txt_content');
         document.getElementById('btn_create').addEventListener('click', _ => {
             let post = {'title': txt_title.value, 'content': txt_content.value, 'timestamp': new Date().getTime()};
-            fetch("https://kvdb.io/XWhijUUk3cEuLTCgHd3eFs/post_" + post.timestamp, {
+            fetch("https://kvdb.io/" + conf.token + "/post_" + post.timestamp, {
                 'method': 'POST',
                 'body': JSON.stringify(post)
             }).then(r => {
                 location.hash = '#' + post.timestamp;
             });
         });
-
-        loadContent();
-
         window.addEventListener('hashchange', function (e) {
             loadContent();
         });
@@ -80,7 +75,7 @@
                     post_create_container.style.display = 'none';
                     post_list_container.style.display = 'none';
                     post_detail_container.style.display = 'block';
-                    fetch("https://kvdb.io/XWhijUUk3cEuLTCgHd3eFs/post_" + hashData + "?&format=json")
+                    fetch("https://kvdb.io/" + conf.token + "/post_" + hashData + "?&format=json")
                         .then(r => r.json()).then(r => {
                         post_title.innerText = r.title;
                         post_content.innerText = r.content;
@@ -90,7 +85,7 @@
                 post_create_container.style.display = 'none';
                 post_list_container.style.display = 'block';
                 post_detail_container.style.display = 'none';
-                fetch("https://kvdb.io/XWhijUUk3cEuLTCgHd3eFs/?regex=%5Epost_&format=json&values=true")
+                fetch("https://kvdb.io/" + conf.token + "/?regex=%5Epost_&format=json&values=true")
                     .then(r => r.json()).then(r => {
                     posts = r;
                     post_list.innerHTML = '';
@@ -105,6 +100,8 @@
                 });
             }
         }
+
+        loadContent();
     })();
 </script>
 </body>
