@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="zh-cn">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+    <title>一图</title>
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/4.0.0/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+<nav class="navbar sticky-top navbar-light bg-light">
+    <span class="navbar-brand mb-0 h1">一图</span>
+    <ul class="navbar-nav justify-content-end">
+        <li class="nav-item"><a class="nav-link" id="btn_create">发帖</a></li>
+    </ul>
+</nav>
+<input id="pic_file" type="file" accept="image/*" style="display: none;">
+<div id="post_list" style="max-width: 650px;">
+</div>
+<hr>
+<footer class="container">
+    <p class="float-right"><a href="#">返回顶部</a></p>
+    <p>&copy; 2019 MWR.PUB</p>
+</footer>
+<script type="text/javascript">
+    'use strict';
+    (function () {
+        let conf = {token: 'X6EMCYFRGo4FjSnoeFbF4f'};
+        let pic_file = document.getElementById('pic_file');
+        let post_list = document.getElementById('post_list');
+        document.getElementById('btn_create').addEventListener('click', _ => pic_file.click());
+        document.getElementById('pic_file').addEventListener('change', ev => {
+            if (ev.target.files.length > 0) {
+                let data = new FormData();
+                data.append('file', ev.target.files[0]);
+                fetch("https://ipfs.evan.network/api/v0/add", {method: 'post', mode: 'cors', body: data,})
+                    .then(res => res.json()).then(res => {
+                    let post = {
+                        'content': res.Hash, 'timestamp': new Date().getTime()
+                    };
+                    fetch("https://kvdb.io/" + conf.token + "/img_" + post.timestamp, {
+                        'method': 'POST', 'body': JSON.stringify(post)
+                    }).then(r => {
+                        loadContent();
+                    });
+                })
+            }
+        });
+
+        function loadContent() {
+            fetch("https://kvdb.io/" + conf.token + "/?regex=%5Eimg_&format=json&values=true")
+                .then(r => r.json()).then(r => {
+                post_list.innerHTML = '';
+                r.reverse().forEach(i => {
+                    let card = document.createElement('div');
+                    let data = JSON.parse(i[1]);
+					let img_url = 'https://ipfs.evan.network/ipfs/' + data.content;
+					let time = (new Date(data.timestamp)).toLocaleString();
+                    card.classList.add('card', 'mt-4', 'ml-4', 'mr-4');
+					card.innerHTML = `<img class="card-img-top" src="${img_url}" alt="OnePic"><div class="card-body"><p class="card-text"><small class="text-muted">${time}</small></p></div>`;
+                    post_list.appendChild(card);
+                })
+            });
+        }
+
+        loadContent();
+    })();
+</script>
+</body>
+</html>
