@@ -34,7 +34,7 @@
             if (ev.target.files.length > 0) {
                 let data = new FormData();
                 data.append('file', ev.target.files[0]);
-                fetch("https://ipfs.evan.network/api/v0/add", {method: 'post', mode: 'cors', body: data,})
+                fetch("https://ipfs.evan.network/api/v0/add", {method: 'post', mode: 'no-cors', body: data,})
                     .then(res => res.json()).then(res => {
                     let post = {
                         'content': res.Hash, 'timestamp': new Date().getTime()
