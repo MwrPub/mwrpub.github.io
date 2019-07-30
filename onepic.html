@@ -34,7 +34,7 @@
             if (ev.target.files.length > 0) {
                 let data = new FormData();
                 data.append('file', ev.target.files[0]);
-                fetch("https://ipfs.evan.network/api/v0/add", {method: 'post', mode: 'no-cors', body: data,})
+                fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
                     .then(res => res.json()).then(res => {
                     let post = {
                         'content': res.Hash, 'timestamp': new Date().getTime()
@@ -55,7 +55,7 @@
                 r.reverse().forEach(i => {
                     let card = document.createElement('div');
                     let data = JSON.parse(i[1]);
-					let img_url = 'https://ipfs.evan.network/ipfs/' + data.content;
+					let img_url = 'https://ipfs.globalupload.io/' + data.content;
 					let time = (new Date(data.timestamp)).toLocaleString();
                     card.classList.add('card', 'mt-4', 'ml-4', 'mr-4');
 					card.innerHTML = `<img class="card-img-top" src="${img_url}" alt="OnePic"><div class="card-body"><p class="card-text"><small class="text-muted">${time}</small></p></div>`;
