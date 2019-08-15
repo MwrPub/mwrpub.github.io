@@ -257,6 +257,14 @@
                 })
             }
         });
+
+        txt_msg.addEventListener('keypress', ev => {
+            let c = ev.which || ev.keyCode;
+            if (c === 13) {
+                chat.send(txt_msg.value);
+                txt_msg.value = "";
+            }
+        });
     })();
 </script>
 </body>
