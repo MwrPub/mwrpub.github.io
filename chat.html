@@ -156,26 +156,40 @@
             background: linear-gradient(dodgerblue, deepskyblue);
             outline: none;
         }
+
+        .msg-img {
+            width: 100%;
+        }
     </style>
 </head>
 <body>
 <header>MwrChat</header>
-<div id="msg_container">
+<div id="msg_container" style="margin-bottom: 100px;">
 </div>
 <footer>
+    <button class="btn" id="btn_pic">图片</button>
     <label for="txt_msg"></label><input class="input-text" type="text" id="txt_msg" placeholder="">
     <button class="btn" id="btn_send">发送</button>
 </footer>
+<input id="pic_file" type="file" accept="image/*" style="display: none;">
 <script type="text/javascript">
     'use strict';
     (function () {
         let msg_container = document.getElementById('msg_container');
         let txt_msg = document.getElementById('txt_msg');
+        let pic_file = document.getElementById('pic_file');
 
         function appendMsg(msg, pos) {
             let message = document.createElement('div');
             message.classList.add('message', pos);
-            message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://api.adorable.io/avatars/48/${msg.username}"/><div class="bubble">${msg.content}</div>`;
+            switch (msg.type) {
+                case "image":
+                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://api.adorable.io/avatars/48/${msg.username}"/><div class="bubble"><img alt="content" class="msg-img" src="${msg.content}" /></div>`;
+                    break;
+                default:
+                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://api.adorable.io/avatars/48/${msg.username}"/><div class="bubble">${msg.content}</div>`;
+                    break;
+            }
             msg_container.append(message);
         }
 
@@ -194,13 +208,19 @@
                     let data = JSON.parse(i[1]);
                     appendMsg({
                         username: data.username,
-                        content: data.content
+                        content: data.content,
+                        type: data.type
                     }, data.username === username ? 'right' : 'left');
                 });
             });
             return {
-                send: function (content) {
-                    let msg = {username: username, content: content, timestamp: new Date().getTime()};
+                send: function (content, type) {
+                    let msg = {
+                        username: username,
+                        content: content,
+                        type: type || 'text',
+                        timestamp: new Date().getTime()
+                    };
                     appendMsg(msg, "right");
                     socket.send(JSON.stringify(msg));
                     fetch("https://kvdb.io/" + conf.token + "/msg_" + msg.timestamp, {
@@ -222,6 +242,19 @@
         document.getElementById('btn_send').addEventListener('click', _ => {
             chat.send(txt_msg.value);
             txt_msg.value = "";
+        });
+
+        document.getElementById('btn_pic').addEventListener('click', _ => pic_file.click());
+
+        pic_file.addEventListener('change', ev => {
+            if (ev.target.files.length > 0) {
+                let data = new FormData();
+                data.append('file', ev.target.files[0]);
+                fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
+                    .then(res => res.json()).then(res => {
+                    chat.send('https://ipfs.globalupload.io/' + res.Hash, 'image');
+                })
+            }
         });
     })();
 </script>
