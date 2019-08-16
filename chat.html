@@ -246,8 +246,10 @@
         let chat = SimpleChat(username, {token: 'GR1sCo3hJzXkrRSACZoyH4', room: 1});
 
         document.getElementById('btn_send').addEventListener('click', _ => {
-            chat.send(txt_msg.value);
-            txt_msg.value = "";
+            if (txt_msg.value.trim()) {
+                chat.send(txt_msg.value);
+                txt_msg.value = "";
+            }
         });
 
         document.getElementById('btn_pic').addEventListener('click', _ => pic_file.click());
@@ -265,7 +267,7 @@
 
         txt_msg.addEventListener('keypress', ev => {
             let c = ev.which || ev.keyCode;
-            if (c === 13) {
+            if (c === 13 && txt_msg.value.trim()) {
                 chat.send(txt_msg.value);
                 txt_msg.value = "";
             }
