@@ -18,12 +18,13 @@
             text-align: center;
             padding: 14px;
             z-index: 99;
+            box-shadow: 0 2px 10px #888888;
         }
 
         footer {
             display: flex;
             width: 100%;
-            background-color: #ddd;
+            background-color: #ededed;
             position: fixed;
             bottom: 0;
             height: 48px;
@@ -184,10 +185,10 @@
             message.classList.add('message', pos);
             switch (msg.type) {
                 case "image":
-                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://api.adorable.io/avatars/48/${msg.username}"/><div class="bubble"><img alt="content" class="msg-img" src="${msg.content}" /></div>`;
+                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://www.tinygraphs.com/squares/${msg.username}?theme=frogideas&numcolors=4&size=48&fmt=svg"/><div class="bubble"><img alt="content" class="msg-img" src="${msg.content}" /></div>`;
                     break;
                 default:
-                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://api.adorable.io/avatars/48/${msg.username}"/><div class="bubble">${msg.content}</div>`;
+                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://www.tinygraphs.com/squares/${msg.username}?theme=frogideas&numcolors=4&size=48&fmt=svg"/><div class="bubble">${msg.content}</div>`;
                     break;
             }
             msg_container.append(message);
