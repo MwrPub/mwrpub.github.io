@@ -13,7 +13,7 @@
 				content = msg.content;
 				break;
 		}
-		console.log(`%c${msg.username}%c:${msg.content}`,(pos=='left')?"color:blue":"color:green","color:black")
+		console.log(`%c${msg.username}%c:${content}`,(pos=='left')?"color:blue":"color:green","color:black")
 	}
 	socket.onmessage = function (e) {
 		let msg = JSON.parse(e.data);
