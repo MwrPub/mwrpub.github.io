@@ -1,6 +1,6 @@
 (function(username,conf){
 let rid = conf.room || 1;
-let token = conf.token || '';
+let token = conf.token || 'GR1sCo3hJzXkrRSACZoyH4';
 let socket = new WebSocket(`wss://connect.websocket.in/mwr_chat?room_id=${rid}`);
 function appendMsg(msg, pos) {
 	let content = "";
