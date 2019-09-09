@@ -2,12 +2,19 @@
 	conf = conf || {};
 	let rid = conf.room || 1;
 	let token = conf.token || 'GR1sCo3hJzXkrRSACZoyH4';
+	let showPic = conf.showPic===undefined?true:conf.showPic;
 	let socket = new WebSocket(`wss://connect.websocket.in/mwr_chat?room_id=${rid}`);
 	function appendMsg(msg, pos) {
 		let content = "";
 		switch (msg.type) {
 			case "image":
-				content = "[图片]";
+				if(showPic){
+					console.log(`%c${msg.username}%c:`,(pos=='left')?"color:blue":"color:green","color:black");
+					console.log("%c ", "padding:50px 50px;background: url(" + msg.content + "); background-size: 100px auto; color: transparent;background-repeat:no-repeat");
+					return;
+				}else{
+					content = "[图片]";
+				}
 				break;
 			default:
 				content = msg.content;
