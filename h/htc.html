@@ -1,0 +1,32 @@
+<div id="origin" style="position: relative;display:inline-block;width:200px;height:200px;">
+	<div style="position:absolute;">
+		<img src="flag.png" width="200" height="200"/>
+	</div>
+	<img id="img_origin" width="200" height="200"/>
+</div>
+<input type="file" name="file" id="file" style="display:none;"/>
+<div id="show">
+	<img id="img_result" width="200" height="200"/>
+</div>
+<script src="http://html2canvas.hertzen.com/dist/html2canvas.js"></script>
+<script>
+let div_origin = document.getElementById("origin");
+let img_origin = document.getElementById("img_origin");
+let img_result = document.getElementById("img_result");
+
+document.getElementById("file").addEventListener("change",function(){
+	let file = this.files[0];
+	let reader = new FileReader();
+	reader.onload=function(){
+		img_origin.src = this.result;
+		html2canvas(div_origin).then(function(canvas) {
+			img_result.setAttribute("crossOrigin",'Anonymous')
+			img_result.src = canvas.toDataURL("image/png");;
+		});
+	}
+	reader.readAsDataURL(file);
+});
+div_origin.addEventListener("click",function(){
+	document.getElementById("file").click();
+});
+</script>
