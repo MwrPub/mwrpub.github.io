@@ -60,11 +60,9 @@
             padding: 10px;
         }
 
-        #iframe_main{
+        #iframe_main {
             border: 0;
             display: none;
-            width: 100%;
-            height: 100%;
         }
     </style>
 </head>
@@ -103,6 +101,14 @@
             loadContent();
         });
 
+        window.addEventListener('resize', function () {
+            changeSize();
+        });
+
+        iframe_main.addEventListener('load', function () {
+            changeSize();
+        });
+
         function loadContent() {
             let hashData = location.hash.substr(1);
             if (hashData) {
@@ -113,8 +119,14 @@
             }
         }
 
+        function changeSize() {
+            iframe_main.height = document.documentElement.clientHeight;
+            iframe_main.width = document.documentElement.clientWidth;
+        }
+
         loadContent();
     })();
+
 </script>
 </body>
 </html>
