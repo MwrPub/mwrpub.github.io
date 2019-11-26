@@ -198,12 +198,16 @@
         function appendMsg(msg, pos) {
             let message = document.createElement('div');
             message.classList.add('message', pos);
+            let avatar = `<img alt="avatar" class="avatar" src="https://www.tinygraphs.com/squares/${msg.username}?theme=frogideas&numcolors=4&size=48&fmt=svg"/>`;
             switch (msg.type) {
                 case "image":
-                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://www.tinygraphs.com/squares/${msg.username}?theme=frogideas&numcolors=4&size=48&fmt=svg"/><div class="bubble"><img alt="content" class="msg-img" src="${msg.content}" /></div>`;
+                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble"><img alt="content" class="msg-img" src="${msg.content}" /></div>`;
+                    break;
+                case "text":
+                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">${msg.content}</div>`;
                     break;
                 default:
-                    message.innerHTML = `<span>${msg.username}</span><img alt="avatar" class="avatar" src="https://www.tinygraphs.com/squares/${msg.username}?theme=frogideas&numcolors=4&size=48&fmt=svg"/><div class="bubble">${msg.content}</div>`;
+                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">位置的消息类型</div>`;
                     break;
             }
             msg_container.append(message);
