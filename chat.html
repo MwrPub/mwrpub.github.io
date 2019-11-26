@@ -177,12 +177,17 @@
     <button class="btn" id="btn_send">发送</button>
 </div>
 <input id="pic_file" type="file" accept="image/*" style="display: none;">
+<bunny-dialog id="dialog" ok="确定" cancel="取消"></bunny-dialog>
+<script src="dialog.js"></script>
 <script type="text/javascript">
     'use strict';
     (function () {
         let msg_container = document.getElementById('msg_container');
         let txt_msg = document.getElementById('txt_msg');
         let pic_file = document.getElementById('pic_file');
+        let dialog = document.getElementById('dialog');
+        let chat = null;
+        let chatConf = {token: 'GR1sCo3hJzXkrRSACZoyH4', room: 1};
 
         function appendMsg(msg, pos) {
             let message = document.createElement('div');
@@ -238,12 +243,31 @@
             }
         }
 
-        let username = localStorage.getItem("username");
-        if (!username) {
-            username = prompt("输入用户名", "");
-            localStorage.setItem("username", username);
+        window.onload = () => {
+            let username = localStorage.getItem("username");
+            if (!username) {
+                init();
+            } else {
+                chat = chat = SimpleChat(username, chatConf);
+            }
+        };
+
+        function init() {
+            dialog.title = "输入用户名";
+            dialog.innerHTML = '<input id="username" type="text" class="input-text" style="height: 32px;width: 300px;">';
+            let txt_username = document.getElementById('username');
+            dialog.show(e => {
+                let username = txt_username.value;
+                if (username) {
+                    localStorage.setItem("username", username);
+                    chat = SimpleChat(username, chatConf)
+                } else {
+                    init();
+                }
+            }, e => {
+                init();
+            });
         }
-        let chat = SimpleChat(username, {token: 'GR1sCo3hJzXkrRSACZoyH4', room: 1});
 
         document.getElementById('btn_send').addEventListener('click', _ => {
             if (txt_msg.value.trim()) {
@@ -256,12 +280,20 @@
 
         pic_file.addEventListener('change', ev => {
             if (ev.target.files.length > 0) {
-                let data = new FormData();
-                data.append('file', ev.target.files[0]);
-                fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
-                    .then(res => res.json()).then(res => {
-                    chat.send('https://ipfs.globalupload.io/' + res.Hash, 'image');
-                })
+                let url = window.URL.createObjectURL(ev.target.files[0]);
+                console.log(url);
+                dialog.title = '是否发送图片';
+                dialog.innerHTML = `<img src="${url}" alt="Preview" width="300"/>`;
+                dialog.show(e => {
+                    let data = new FormData();
+                    data.append('file', ev.target.files[0]);
+                    fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
+                        .then(res => res.json()).then(res => {
+                        chat.send('https://ipfs.globalupload.io/' + res.Hash, 'image');
+                    })
+                }, e => {
+                    pic_file.value = '';
+                });
             }
         });
 
