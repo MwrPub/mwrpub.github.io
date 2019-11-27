@@ -229,7 +229,6 @@
             };
             fetch(`https://kvdb.io/${token}/?regex=%5Emsg_&format=json&values=true`)
                 .then(r => r.json()).then(r => {
-                let index = 0;
                 r.forEach(i => {
                     let data = JSON.parse(i[1]);
                     appendMsg({
@@ -240,7 +239,7 @@
                 });
             });
             return {
-                send: function (content, type) {
+                send: function (content, type, callback) {
                     let msg = {
                         username: username,
                         content: content,
@@ -252,7 +251,7 @@
                     fetch("https://kvdb.io/" + conf.token + "/msg_" + msg.timestamp, {
                         'method': 'POST', 'body': JSON.stringify(msg)
                     }).then(r => {
-
+                        if (typeof callback === 'function') callback(msg.timestamp);
                     });
                 }
             }
