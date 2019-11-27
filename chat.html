@@ -231,7 +231,7 @@
                     message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">${msg.content}</div>`;
                     break;
                 case "tts":
-                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble"><button class="btn-play" onclick="playTTS('${msg.content}')">▶点击播放</button></div>`;
+                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble"><button class="btn-play" onclick="playTTS('${msg.content}')">▶</button> 点击播放</div>`;
                     break;
                 default:
                     message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">未知的消息类型</div>`;
