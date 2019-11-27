@@ -171,6 +171,23 @@
         .msg-img {
             width: 100%;
         }
+
+        .btn-play {
+            color: white;
+            width: 36px;
+            height: 36px;
+            line-height: 18px;
+            font-size: 18px;
+            border-radius: 40px;
+            border: deepskyblue 1px solid;
+            background: linear-gradient(deepskyblue, dodgerblue);
+        }
+
+        .btn-play:active {
+            border: dodgerblue 1px solid;
+            background: linear-gradient(dodgerblue, deepskyblue);
+            outline: none;
+        }
     </style>
 </head>
 <body>
@@ -179,6 +196,7 @@
 </div>
 <div class="bottom-bar">
     <button class="btn" id="btn_pic">图片</button>
+    <button class="btn" id="btn_tts">语音</button>
     <label for="txt_msg"></label><input class="input-text" type="text" id="txt_msg" placeholder="">
     <button class="btn" id="btn_send">发送</button>
 </div>
@@ -192,6 +210,8 @@
         let txt_msg = document.getElementById('txt_msg');
         let pic_file = document.getElementById('pic_file');
         let dialog = document.getElementById('dialog');
+        let btn_pic = document.getElementById('btn_pic');
+        let btn_tts = document.getElementById('btn_tts');
         let chat = null;
         let chatConf = {
             token: 'GR1sCo3hJzXkrRSACZoyH4',
@@ -209,6 +229,9 @@
                     break;
                 case "text":
                     message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">${msg.content}</div>`;
+                    break;
+                case "tts":
+                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble"><button class="btn-play" onclick="playTTS('${msg.content}')">▶点击播放</button></div>`;
                     break;
                 default:
                     message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">未知的消息类型</div>`;
@@ -290,12 +313,11 @@
             }
         });
 
-        document.getElementById('btn_pic').addEventListener('click', _ => pic_file.click());
+        btn_pic.addEventListener('click', _ => pic_file.click());
 
         pic_file.addEventListener('change', ev => {
             if (ev.target.files.length > 0) {
                 let url = window.URL.createObjectURL(ev.target.files[0]);
-                console.log(url);
                 dialog.title = '是否发送图片';
                 dialog.innerHTML = `<img src="${url}" alt="Preview" width="300"/>`;
                 dialog.show(e => {
@@ -311,6 +333,18 @@
             }
         });
 
+        btn_tts.addEventListener('click', ev => {
+            dialog.title = "输入语音文本";
+            dialog.innerHTML = '<input id="txt_tts" type="text" class="input-text" style="height: 32px;width: 300px;">';
+            let txt_tts = document.getElementById('txt_tts');
+            dialog.show(e => {
+                let tts = txt_tts.value;
+                if (tts && tts.trim()) {
+                    chat.send(tts.trim(), 'tts');
+                }
+            });
+        });
+
         txt_msg.addEventListener('keypress', ev => {
             let c = ev.which || ev.keyCode;
             if (c === 13 && txt_msg.value.trim()) {
@@ -318,6 +352,21 @@
                 txt_msg.value = "";
             }
         });
+
+        txt_msg.addEventListener('blur', ev => {
+            btn_pic.style.display = '';
+            btn_tts.style.display = '';
+        });
+
+        txt_msg.addEventListener('focus', ev => {
+            btn_pic.style.display = 'none';
+            btn_tts.style.display = 'none';
+        });
+
+        window.playTTS = function (text) {
+            let s = new Audio(`https://tts.baidu.com/text2audio?tex=${text}&cuid=baike&lan=ZH&ctp=1&pdt=301&vol=9&rate=32&per=0`);
+            s.play();
+        }
     })();
 </script>
 </body>
