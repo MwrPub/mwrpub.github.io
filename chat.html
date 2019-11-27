@@ -34,7 +34,7 @@
             height: 48px;
         }
 
-        @media screen and (max-aspect-ratio: 9/17) {
+        @media screen and (max-aspect-ratio: 9/16) {
             .bottom-bar {
                 padding-bottom: 20px;
             }
@@ -193,7 +193,11 @@
         let pic_file = document.getElementById('pic_file');
         let dialog = document.getElementById('dialog');
         let chat = null;
-        let chatConf = {token: 'GR1sCo3hJzXkrRSACZoyH4', room: 1};
+        let chatConf = {
+            token: 'GR1sCo3hJzXkrRSACZoyH4',
+            room: 1,
+            access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImNlYmFmNTg3YjRiNDQ4ZDFjYjdiMGZiOGQwODU1ZTgwMDhiYzg5YjdkZGNmZGMwOGIwNjllM2Q5MTg1MTRiMmM5OWFmYzgxYzg3OWU5ZmNiIn0.eyJhdWQiOiI2IiwianRpIjoiY2ViYWY1ODdiNGI0NDhkMWNiN2IwZmI4ZDA4NTVlODAwOGJjODliN2RkY2ZkYzA4YjA2OWUzZDkxODUxNGIyYzk5YWZjODFjODc5ZTlmY2IiLCJpYXQiOjE1NzQ4MjAxMzQsIm5iZiI6MTU3NDgyMDEzNCwiZXhwIjoxNjA2NDQyNTMzLCJzdWIiOiI3OCIsInNjb3BlcyI6W119.vR_d7CQKabg1Olta2ihxAxiHGtsX7SM8tj-oCdyk5SzGO02T785gO6ayEGl9orQx4UEK9R1DmvAnGiw1U7uqCeLSUjhUU0w00csX3vouJw56z7t0pNuD2Ble_2vq7DSVQVzHLCuW5H1V8Ax6AOoxzZELbVONeG09R9vbWV5pymDxMl-S7ztSEDRsa1zwN7gAYwehiI_aDv05gyy4npINGvPrzYc3nCuBov3Q5RshsExvSk2mcX1a1AN_qo4NVfXDXv3k7KAav4JgiSiGlG3QvIX-5xlXHDi3G_R2PHq7l7je-kKtxky-dbPRSNvKJWzqjCc7xNNA8EO18bkTGxSfDqNUASGQU0wzUg7_OiiwkplgsZ7rn3aEiMHQ3Rchfbje2qxqLCRXw1RkxcNQn3eDIsXG7UBkcP2IJWETtjr4QKHN3FrDrPfzLWNcgAkwa44Kel0Wex8LLajRQdH8UDYkhiCcRH7xj3eSicdDOyGxygDpvFC_fK8Tq4yZweOr9_aJ5gPliq8zb2ROfPDLZRotmvTpJdSrEbhWZqmiUTa3bcWFfe65y8S395Gt5bkxOvUXvXXtKZw7cg2afS6BXLO4lgUW_SB0y0PkfgNfm_EK03jjC5lxVztGLsDpjMJccG8OkAkSezd5veSmVhIxVuItk3mQpgO61Py1JsDkOkqFT4A'
+        };
 
         function appendMsg(msg, pos) {
             let message = document.createElement('div');
@@ -217,12 +221,13 @@
         function SimpleChat(username, conf) {
             let rid = conf.room || 1;
             let token = conf.token || '';
-            let socket = new WebSocket(`wss://connect.websocket.in/mwr_chat?room_id=${rid}`);
+            let access_token = conf.access_token;
+            let socket = new WebSocket(`wss://connect.websocket.in/v2/${rid}?token=${access_token}`);
             socket.onmessage = function (e) {
                 let msg = JSON.parse(e.data);
                 appendMsg(msg, "left");
             };
-            fetch("https://kvdb.io/" + conf.token + "/?regex=%5Emsg_&format=json&values=true")
+            fetch(`https://kvdb.io/${token}/?regex=%5Emsg_&format=json&values=true`)
                 .then(r => r.json()).then(r => {
                 let index = 0;
                 r.forEach(i => {
