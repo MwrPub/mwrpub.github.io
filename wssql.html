@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<textarea id="txt_in" style="display: block"></textarea>
+<button id="btn_run">Run</button>
+<div id="results"></div>
+<script src="table.js"></script>
+<script>
+    function WebSocketSQL(db) {
+        let socket = new WebSocket('ws://sql.mwr.pub/' + db);
+        let callbacks = {};
+        socket.onmessage = function (e) {
+            let response = JSON.parse(e.data);
+            if (callbacks[response.id]) {
+                callbacks[response.id](response);
+                callbacks[response.id] = null;
+            }
+        };
+        return {
+            query: function (sql) {
+                return new Promise((resolve, reject) => {
+                    let seq = (new Date()).getTime();
+                    callbacks[seq] = function (data) {
+                        if (data.ret === -1) {
+                            reject(data.error)
+                        } else {
+                            resolve(data.data)
+                        }
+                    };
+                    socket.send(JSON.stringify({sql: sql, type: 'query', id: seq}))
+                });
+            },
+            execute: function (sql) {
+                return new Promise((resolve, reject) => {
+                    let seq = (new Date()).getTime();
+                    callbacks[seq] = function (data) {
+                        if (data.ret === -1) {
+                            reject(data.error);
+                        } else {
+                            resolve(data.row);
+                        }
+                    };
+                    socket.send(JSON.stringify({sql: sql, type: 'execute', id: seq}))
+                });
+            },
+            close: function () {
+                socket.send("close");
+            },
+        }
+    }
+</script>
+<script>
+    let btn_run = document.getElementById('btn_run');
+    let txt = document.getElementById('txt_in');
+    let wsSql = WebSocketSQL('test');
+    let results = document.getElementById('results');
+    btn_run.addEventListener('click', async function () {
+        if (txt.value && txt.value.trim()) {
+            results.innerHTML = '';
+            let sqlList = txt.value.trim().split(';');
+            let selReg = /select\s?.*from\s?.*/i;
+            let i = 0;
+            let sql = sqlList[i];
+            for (let sql of sqlList) {
+                sql = sql.trim();
+                if (sql) {
+                    let pSQL = document.createElement('p');
+                    pSQL.innerText = 'SQL:' + sql;
+                    results.appendChild(pSQL);
+                    if (selReg.test(sql)) {
+                        try {
+                            let dataList = await wsSql.query(sql);
+                            let table = document.createElement('mwr-table');
+                            table.list = dataList;
+                            results.appendChild(table);
+                        } catch (e) {
+                            let pErr = document.createElement('p');
+                            pErr.innerText = 'Error:' + e;
+                            results.appendChild(pErr);
+                        }
+                    } else {
+                        try {
+                            let rows = await wsSql.execute(sql);
+                            let pRow = document.createElement('p');
+                            pRow.innerText = 'Affect Rows:' + rows;
+                            results.appendChild(pRow);
+                        } catch (e) {
+                            let pErr = document.createElement('p');
+                            pErr.innerText = 'Error:' + e;
+                            results.appendChild(pErr);
+                        }
+                    }
+                    let hr = document.createElement('hr');
+                    results.appendChild(hr);
+                }
+            }
+        }
+    });
+</script>
+</body>
+</html>
