@@ -1,0 +1,58 @@
+<html>
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1.0, user-scalable=0">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        #iframe_main {
+            border: 0;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<iframe id="iframe_main">
+
+</iframe>
+<script type="text/javascript">
+    'use strict';
+    (function () {
+        let iframe_main = document.getElementById('iframe_main');
+
+        window.addEventListener('hashchange', function (e) {
+            loadContent();
+        });
+
+        window.addEventListener('resize', function () {
+            changeSize();
+        });
+
+        iframe_main.addEventListener('load', function () {
+            changeSize();
+        });
+
+        function loadContent() {
+            let hashData = location.hash.substr(1);
+            if (hashData) {
+                iframe_main.src = hashData;
+                iframe_main.style.display = "block";
+            }
+        }
+
+        function changeSize() {
+            iframe_main.height = document.documentElement.clientHeight;
+            iframe_main.width = document.documentElement.clientWidth;
+        }
+
+        loadContent();
+    })();
+
+</script>
+</body>
+</html>
