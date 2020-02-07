@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh">
 <head>
     <meta charset="UTF-8">
     <title>OnePaper</title>
@@ -9,6 +9,7 @@
     <style type="text/css">
         .toolbar {
             border: 1px solid #ccc;
+            overflow-x: auto;
         }
 
         .text {
@@ -125,6 +126,28 @@
         let txtTitle = document.getElementById('txt_title');
         let txt_result = document.getElementById('txt_result');
 
+        editor.customConfig.menus = [
+            'image',
+            'head',
+            'bold',
+            'fontSize',
+            'fontName',
+            'italic',
+            'underline',
+            'strikeThrough',
+            'foreColor',
+            'backColor',
+            'link',
+            'list',
+            'justify',
+            'quote',
+            'table',
+            'video',
+            'code',
+            'undo',
+            'redo',
+        ];
+
         editor.customConfig.customUploadImg = function (files, insert) {
             let data = new FormData();
             data.append('file', files[0]);
@@ -142,7 +165,7 @@
             data.append('file', html);
             fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
                 .then(res => res.json()).then(res => {
-                let url = 'https://ipfs.globalupload.io/' + res.Hash;
+                let url = 'https://permaweb.io/ipfs/' + res.Hash;
                 txt_result.innerHTML = `<a href="${url}" target="_blank">${url}</a>`;
                 txt_result.style.display = "block";
             })
