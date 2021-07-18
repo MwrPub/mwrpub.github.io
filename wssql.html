@@ -11,7 +11,7 @@
 <script src="table.js"></script>
 <script>
     function WebSocketSQL(db) {
-        let socket = new WebSocket('ws://sql.mwr.pub/' + db);
+        let socket = new WebSocket('wss://sql.mwr.pub/' + db);
         let callbacks = {};
         socket.onmessage = function (e) {
             let response = JSON.parse(e.data);
