@@ -207,5 +207,5 @@ button:hover.ok {
         }
     }
 
-    window.customElements.define('bunny-dialog', BunnyDialog);
+    customElements.define('bunny-dialog', BunnyDialog);
 })();

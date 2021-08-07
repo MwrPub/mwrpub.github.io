@@ -216,7 +216,7 @@
         const magicStr = 'fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF';
         let table = {};
         for (let i = 0; i < magicStr.length; i++) table[magicStr[i]] = BigInt(i);
-        let s = [11, 10, 3, 8, 4, 6, 2, 9, 5, 7];
+        let s = [12, 11, 4, 9, 5, 7, 3, 10, 6, 8];
         const XOR = 177451812n, ADD = 100618342136696320n;
 
         let chat = null;
@@ -250,7 +250,7 @@
         }
 
         function SimpleChat(username, conf) {
-            let rid = conf.room ? decode(conf.room) : 1;
+            let rid = (conf.room && conf.room.toLowerCase().startsWith('mwr')) ? decode(conf.room) : 1;
             let socket = new WebSocket(`wss://connect.websocket.in/v3/${rid}?apiKey=${conf.access_token}`);
             let callback = conf.callback || function (data) {
                 console.log(`${data.username}:${data.content}`);
@@ -387,7 +387,7 @@
 
         function encode(src) {
             src = (src ^ XOR) + ADD;
-            let r = Array.from('BV          ');
+            let r = Array.from('mwr          ');
             for (let i = 0; i < 10; i++) {
                 r[s[i]] = magicStr[Number(src / 58n ** BigInt(i) % 58n)]
             }
