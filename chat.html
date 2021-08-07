@@ -1,4 +1,4 @@
-<html>
+<html lang="zh">
 <head>
     <meta charset="utf-8">
     <title>Message With Reply</title>
@@ -173,6 +173,7 @@
         }
 
         .btn-play {
+            outline: none;
             color: white;
             width: 36px;
             height: 36px;
@@ -186,7 +187,6 @@
         .btn-play:active {
             border: dodgerblue 1px solid;
             background: linear-gradient(dodgerblue, deepskyblue);
-            outline: none;
         }
     </style>
 </head>
@@ -212,16 +212,24 @@
         let dialog = document.getElementById('dialog');
         let btn_pic = document.getElementById('btn_pic');
         let btn_tts = document.getElementById('btn_tts');
+
+        const magicStr = 'fZodR9XQDSUm21yCkr6zBqiveYah8bt4xsWpHnJE7jL5VG3guMTKNPAwcF';
+        let table = {};
+        for (let i = 0; i < magicStr.length; i++) table[magicStr[i]] = BigInt(i);
+        let s = [11, 10, 3, 8, 4, 6, 2, 9, 5, 7];
+        const XOR = 177451812n, ADD = 100618342136696320n;
+
         let chat = null;
         let chatConf = {
             token: 'GR1sCo3hJzXkrRSACZoyH4',
             room: 1,
-            access_token: 'eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiIsImp0aSI6ImJjMWQ5ZWQ5ZmUxYmRmMjY4OWFjNzFlYjAyMjQ3Mzg3OTM5OTFkYzdhMmQ4NzA4ODgwMDVkMGE3YjcyMmZlNjEwYTBhMDhjZTBiMzM4ZTJjIn0.eyJhdWQiOiI4IiwianRpIjoiYmMxZDllZDlmZTFiZGYyNjg5YWM3MWViMDIyNDczODc5Mzk5MWRjN2EyZDg3MDg4ODAwNWQwYTdiNzIyZmU2MTBhMGEwOGNlMGIzMzhlMmMiLCJpYXQiOjE1NzgxMzAwMDMsIm5iZiI6MTU3ODEzMDAwMywiZXhwIjoxNjA5NzUyNDAzLCJzdWIiOiIyODIiLCJzY29wZXMiOltdfQ.es9MHOkr1RkhaaxSGlw2xo9hkYv-q2OVhrGuRnIHxo8mfGk9gr0t-dGoDAwxzohLCKnAI-ivLfoNR8e_XRw3MuJ3N6DCF0XlAuVaRxHVXqTHt9-XTMBFI5GTaaeHNCLf_q5deZprLDZCeKat-OguRqJTPzzW3jYV7LzL2lQ0YYjcTEwjrZnFL7gwLYh0sEtsQkWTW_cbrlyUbkL4HgEjA_X1CI-0VLUzuVsn54y3wKbig3VJCC7Vdv8RqJpQX-bnz5ZYehQhLnxk3LCSt1yVEIi5JVL83Gtlg7wJzthUi6Ut2cgB8a6sLUec73Qy9X7uGpUrU27i__WHOrpTFnGiXwARcsaQ3dKDYcyt2fdYrB2vSVCIxHfdYZ2qA5daygoKhMSiRHpUgixeewN1FRPNA_dNMpBaexztndkPWzTdxsTDQGabvsR8pDRsUBINHiaibWBoMH_tdb7HHO9lD3iVAwayyDhJeCBwQTguRi-0R_IJKfeYutcWPoqqosRqPtbXBSYlGDWzq6epc-vIig5psuUEdZd-4zn-Q_kaFm8O4fe5Rx5amznQWwJ5PSedWkgo-54K0T4sH-UY1TRvVXLbIplnbIp5XcPUCFRh1YdRbOl1MWaZJIJaeY9GxCshjpFM6GI1GvNKpPJDnRLTfiq52UDXl1-n_NuOVk-M6uaBhTc'
+            access_token: 'oaEOQ1rlxOXfwdetCubUTs8E1vULGlQCywWUqs7p',
+            callback: appendMsg,
         };
 
-        function appendMsg(msg, pos) {
+        function appendMsg(msg) {
             let message = document.createElement('div');
-            message.classList.add('message', pos);
+            message.classList.add('message', chat.username === msg.username ? 'right' : 'left');
             let avatar = `<img alt="avatar" class="avatar" src="https://www.tinygraphs.com/squares/${msg.username}?theme=frogideas&numcolors=4&size=48&fmt=svg"/>`;
             switch (msg.type) {
                 case "image":
@@ -231,7 +239,7 @@
                     message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">${msg.content}</div>`;
                     break;
                 case "tts":
-                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble"><button class="btn-play" onclick="playTTS('${msg.content}')">▶</button> 点击播放</div>`;
+                    message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble"><button class="btn-play" data-content="${msg.content}">▶</button> 点击播放</div>`;
                     break;
                 default:
                     message.innerHTML = `<span>${msg.username}</span>${avatar}<div class="bubble">未知的消息类型</div>`;
@@ -242,67 +250,74 @@
         }
 
         function SimpleChat(username, conf) {
-            let rid = conf.room || 1;
-            let token = conf.token || '';
-            let access_token = conf.access_token;
-            let socket = new WebSocket(`wss://connect.websocket.in/v2/${rid}?token=${access_token}`);
-            socket.onmessage = function (e) {
-                let msg = JSON.parse(e.data);
-                appendMsg(msg, "left");
+            let rid = conf.room ? decode(conf.room) : 1;
+            let socket = new WebSocket(`wss://connect.websocket.in/v3/${rid}?apiKey=${conf.access_token}`);
+            let callback = conf.callback || function (data) {
+                console.log(`${data.username}:${data.content}`);
             };
-            fetch(`https://kvdb.io/${token}/?regex=%5Emsg_&format=json&values=true`)
-                .then(r => r.json()).then(r => {
+            socket.onmessage = function (e) {
+                callback(JSON.parse(e.data));
+            };
+            fetch(`https://kvdb.io/${conf.token}/?regex=%5Emsg_${rid}_&format=json&values=true`).then(r => r.json()).then(r => {
                 r.forEach(i => {
                     let data = JSON.parse(i[1]);
-                    appendMsg({
-                        username: data.username,
-                        content: data.content,
-                        type: data.type
-                    }, data.username === username ? 'right' : 'left');
+                    callback({username: data.username, content: data.content, type: data.type});
                 });
             });
             return {
-                send: function (content, type, callback) {
+                username: username,
+                close() {
+                    socket.close();
+                }, send(content, type) {
                     let msg = {
                         username: username,
                         content: content,
                         type: type || 'text',
-                        timestamp: new Date().getTime()
+                        timestamp: Date.now(),
                     };
-                    appendMsg(msg, "right");
+                    callback(msg);
                     socket.send(JSON.stringify(msg));
-                    fetch("https://kvdb.io/" + conf.token + "/msg_" + msg.timestamp, {
-                        'method': 'POST', 'body': JSON.stringify(msg)
-                    }).then(r => {
-                        if (typeof callback === 'function') callback(msg.timestamp);
+                    fetch(`https://kvdb.io/${conf.token}/msg_${rid}_${msg.timestamp}`, {
+                        'method': 'POST',
+                        'body': JSON.stringify(msg)
                     });
                 }
             }
         }
 
-        window.onload = () => {
-            let username = localStorage.getItem("username");
+        function load() {
+            let username = localStorage.getItem('username');
             if (!username) {
-                init();
+                initUsername();
             } else {
-                chat = chat = SimpleChat(username, chatConf);
+                chatConf.room = location.hash.substr(1);
+                chat = SimpleChat(username, chatConf);
             }
-        };
+        }
 
-        function init() {
+        window.addEventListener('load', () => load());
+        window.addEventListener('hashchange', () => {
+            if (chat) {
+                chat.close();
+                chat = null
+            }
+            load();
+        });
+
+        function initUsername() {
             dialog.title = "输入用户名";
             dialog.innerHTML = '<input id="username" type="text" class="input-text" style="height: 32px;width: 300px;">';
             let txt_username = document.getElementById('username');
-            dialog.show(e => {
+            dialog.show(() => {
                 let username = txt_username.value;
                 if (username) {
                     localStorage.setItem("username", username);
-                    chat = SimpleChat(username, chatConf)
+                    load();
                 } else {
-                    init();
+                    initUsername();
                 }
-            }, e => {
-                init();
+            }, () => {
+                initUsername();
             });
         }
 
@@ -313,31 +328,31 @@
             }
         });
 
-        btn_pic.addEventListener('click', _ => pic_file.click());
+        btn_pic.addEventListener('click', () => pic_file.click());
 
         pic_file.addEventListener('change', ev => {
             if (ev.target.files.length > 0) {
                 let url = window.URL.createObjectURL(ev.target.files[0]);
                 dialog.title = '是否发送图片';
                 dialog.innerHTML = `<img src="${url}" alt="Preview" width="300"/>`;
-                dialog.show(e => {
+                dialog.show(() => {
                     let data = new FormData();
                     data.append('file', ev.target.files[0]);
                     fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
                         .then(res => res.json()).then(res => {
                         chat.send('https://ipfs.globalupload.io/' + res.Hash, 'image');
                     })
-                }, e => {
+                }, () => {
                     pic_file.value = '';
                 });
             }
         });
 
-        btn_tts.addEventListener('click', ev => {
+        btn_tts.addEventListener('click', () => {
             dialog.title = "输入语音文本";
             dialog.innerHTML = '<input id="txt_tts" type="text" class="input-text" style="height: 32px;width: 300px;">';
             let txt_tts = document.getElementById('txt_tts');
-            dialog.show(e => {
+            dialog.show(() => {
                 let tts = txt_tts.value;
                 if (tts && tts.trim()) {
                     chat.send(tts.trim(), 'tts');
@@ -353,19 +368,38 @@
             }
         });
 
-        txt_msg.addEventListener('blur', ev => {
+        txt_msg.addEventListener('blur', () => {
             btn_pic.style.display = '';
             btn_tts.style.display = '';
         });
 
-        txt_msg.addEventListener('focus', ev => {
+        txt_msg.addEventListener('focus', () => {
             btn_pic.style.display = 'none';
             btn_tts.style.display = 'none';
         });
 
-        window.playTTS = function (text) {
-            let s = new Audio(`https://tts.baidu.com/text2audio?tex=${text}&cuid=baike&lan=ZH&ctp=1&pdt=301&vol=9&rate=32&per=0`);
-            s.play();
+        window.addEventListener('click', ev => {
+            if (ev.target.matches('.btn-play')) {
+                let s = new Audio(`https://tts.baidu.com/text2audio?tex=${ev.target.dataset.content}&cuid=baike&lan=ZH&ctp=1&pdt=301&vol=9&rate=32&per=0`);
+                s.play();
+            }
+        }, true);
+
+        function encode(src) {
+            src = (src ^ XOR) + ADD;
+            let r = Array.from('BV          ');
+            for (let i = 0; i < 10; i++) {
+                r[s[i]] = magicStr[Number(src / 58n ** BigInt(i) % 58n)]
+            }
+            return r.join('');
+        }
+
+        function decode(src) {
+            let r = 0n;
+            for (let i = 0; i < 10; i++) {
+                r += table[src[s[i]]] * (58n ** BigInt(i));
+            }
+            return (r - ADD) ^ XOR;
         }
     })();
 </script>
