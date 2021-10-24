@@ -337,10 +337,10 @@
                 dialog.innerHTML = `<img src="${url}" alt="Preview" width="300"/>`;
                 dialog.show(() => {
                     let data = new FormData();
-                    data.append('file', ev.target.files[0]);
-                    fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
+                    data.append('image', ev.target.files[0]);
+                    fetch("https://yespic.vercel.app/ipfs/upload", {method: 'post', mode: 'cors', body: data,})
                         .then(res => res.json()).then(res => {
-                        chat.send('https://ipfs.globalupload.io/' + res.Hash, 'image');
+                        chat.send('https://yespic.vercel.app/' + res.url, 'image');
                     })
                 }, () => {
                     pic_file.value = '';
