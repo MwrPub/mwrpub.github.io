@@ -36,19 +36,24 @@
 <script type="text/javascript">
     'use strict';
     (function () {
+        const URL = 'https://yespic.vercel.app';
         let pic_file = document.getElementById('pic_file');
         let post_list = document.getElementById('post_list');
         let post_detail = document.getElementById('post_detail');
         let db = null;
 
         const ipfsConfig = {
-            repo: '/MwrPub/OnePic',
+            repo: '/MwrPub/OnePic2',
             EXPERIMENTAL: {
                 pubsub: true,
             },
             config: {
                 Addresses: {
-                    Swarm: ['/dns4/ws-star.discovery.libp2p.io/tcp/443/wss/p2p-websocket-star',]
+                    Swarm: [
+                        '/dns4/wrtc-star1.par.dwebops.pub/tcp/443/wss/p2p-webrtc-star/',
+                        '/dns4/wrtc-star2.sjc.dwebops.pub/tcp/443/wss/p2p-webrtc-star/',
+                        '/dns4/webrtc-star.discovery.libp2p.io/tcp/443/wss/p2p-webrtc-star/',
+                    ]
                 },
             }
         };
@@ -81,11 +86,11 @@
         document.getElementById('pic_file').addEventListener('change', ev => {
             if (ev.target.files.length > 0) {
                 let data = new FormData();
-                data.append('file', ev.target.files[0]);
-                fetch("https://api.globalupload.io/transport/add", {method: 'post', mode: 'cors', body: data,})
+                data.append('image', ev.target.files[0]);
+                fetch(`${URL}/ipfs/upload`, {method: 'post', mode: 'cors', body: data,})
                     .then(res => res.json()).then(res => {
                     let post = {
-                        'content': res.Hash, 'timestamp': new Date().getTime()
+                        'content': res.url, 'timestamp': new Date().getTime()
                     };
                     post._id = "img_" + post.timestamp;
                     db.put(post).then(r => {
@@ -101,7 +106,7 @@
         });
 
         function loadContent() {
-            let hashData = location.hash.substr(1);
+            let hashData = location.hash.substring(1);
             if (hashData) {
                 post_list.style.display = 'none';
                 post_detail.style.display = 'block';
@@ -109,7 +114,7 @@
                 let res = db.query(i => i._id === 'img_' + hashData);
                 console.log(res);
                 let r = res[0];
-                document.getElementById('post_detail_img').src = 'https://ipfs.globalupload.io/' + r.content;
+                document.getElementById('post_detail_img').src = `${URL}${r.content}`;
                 document.getElementById('post_detail_time').innerText = (new Date(r.timestamp)).toLocaleString();
             } else {
                 post_list.style.display = 'block';
@@ -120,11 +125,11 @@
                 post_list.innerHTML = '';
                 r.forEach(data => {
                     let card = document.createElement('div');
-                    let img_url = 'https://ipfs.globalupload.io/' + data.content;
+                    let img_url = `${URL}${data.content}`;
                     let time = (new Date(data.timestamp)).toLocaleString();
                     card.classList.add('card', 'mt-4', 'ml-4', 'mr-4');
                     card.addEventListener('click', _ => {
-                        location.hash = data._id.substr(4);
+                        location.hash = data._id.substring(4);
                     });
                     card.innerHTML = `<img class="card-img-top" src="${img_url}" alt="OnePic"><div class="card-body"><p class="card-text"><small class="text-muted">${time}</small></p></div>`;
                     post_list.prepend(card);
