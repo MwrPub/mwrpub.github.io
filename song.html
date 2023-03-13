@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Monarchy Win Rhythm</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+<button id="btn_play">Play</button>
+<script>
+    (function () {
+        const btn_play = document.getElementById('btn_play');
+        const MWR_SHEET = [
+            'G4', 'G4', 'A4', 'G4', '',
+            'G4', 'G4', 'F4', 'E4', '',
+            'D4', 'D4', 'C4', 'D4', '',
+            'E4', 'E4', 'G4', 'G4', '',
+
+            'G4', 'G4', 'A4', 'G4', '',
+            'G4', 'G4', 'F4', 'E4', '',
+            'D4', 'D4', 'C4', 'D4', '',
+            'E4', 'E4', 'D4', 'D4', '',
+
+            'G4', 'G4', 'A4', 'G4', '',
+            'G4', 'G4', 'F4', 'E4', '',
+            'D4', 'D4', 'C4', 'D4', '',
+            'E4', 'E4', 'G4', 'G4', '',
+
+            'G4', 'G4', 'A4', 'G4', '',
+            'G4', 'G4', 'F4', 'E4', '',
+            'D4', 'D4', 'C4', 'D4', '',
+            'E4', 'E4', 'D4', 'D4', '',
+        ];
+        const AudioContext = window.AudioContext || window.webkitAudioContext;
+        const audioCtx = new AudioContext();
+        const voiceEffect = (frequency) => {
+            const oscillator = audioCtx.createOscillator();
+            const gainNode = audioCtx.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioCtx.destination);
+            oscillator.type = 'sine';
+            oscillator.frequency.value = frequency;
+            gainNode.gain.setValueAtTime(0, audioCtx.currentTime);
+            gainNode.gain.linearRampToValueAtTime(1, audioCtx.currentTime + 0.01);
+            oscillator.start(audioCtx.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 1);
+            oscillator.stop(audioCtx.currentTime + 1);
+        }
+        const playSong = (sheet = []) => {
+            let i = 0;
+            const flag = setInterval(() => {
+                if (i >= sheet.length) {
+                    clearInterval(flag);
+                    return;
+                }
+                if (sheet[i]) {
+                    voiceEffect(getFrequency(sheet[i]))
+                }
+                i++;
+            }, 500);
+            return {
+                stop: () => {
+                    clearInterval(flag);
+                }
+            }
+        }
+
+        function getFrequency(note) {
+            const baseFrequency = 261.63; // frequency of middle C (C4)
+            const notesAboveBase = 'C D EF G A B'.indexOf(note.charAt(0));
+            const octave = note.charAt(1) || '4';
+            const semitonesAboveBase = notesAboveBase + (+octave - 4) * 12;
+            return baseFrequency * Math.pow(2, semitonesAboveBase / 12);
+        }
+
+        btn_play.addEventListener("click", () => {
+            playSong(MWR_SHEET);
+        })
+    })();
+</script>
+</body>
+</html>
